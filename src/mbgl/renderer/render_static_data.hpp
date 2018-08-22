@@ -18,6 +18,7 @@ public:
     gl::VertexBuffer<ExtrusionTextureLayoutVertex> extrusionTextureVertexBuffer;
 
     gl::IndexBuffer<gl::Triangles> quadTriangleIndexBuffer;
+    gl::IndexBuffer<gl::Triangles> quadTriangleIndexBufferInverted;
     gl::IndexBuffer<gl::LineStrip> tileBorderIndexBuffer;
 
     SegmentVector<BackgroundAttributes> tileTriangleSegments;

@@ -161,7 +161,8 @@ void RenderHillshadeLayer::render(PaintParameters& parameters, RenderSource* src
                 parameters.depthModeForSublayer(0, gl::DepthMode::ReadOnly),
                 gl::StencilMode::disabled(),
                 parameters.colorModeForRenderPass(),
-                parameters.staticData.quadTriangleIndexBuffer,
+                // We flip the Y-axis, so we need to use an inverted winding order.
+                parameters.staticData.quadTriangleIndexBufferInverted,
                 parameters.staticData.rasterSegments,
                 allUniformValues,
                 allAttributeBindings,

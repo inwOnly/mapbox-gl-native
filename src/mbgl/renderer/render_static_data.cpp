@@ -13,10 +13,27 @@ static gl::VertexVector<PositionOnlyLayoutAttributes::Vertex> tileVertices() {
 }
 
 static gl::IndexVector<gl::Triangles> quadTriangleIndices() {
-    gl::IndexVector<gl::Triangles> result;
-    result.emplace_back(0, 1, 2);
-    result.emplace_back(1, 2, 3);
-    return result;
+    gl::IndexVector<gl::Triangles> triangles;
+    // ┌──────┐
+    // │ 0  1 │ Counter-clockwise winding order.
+    // │      │ Triangle 1: 0 => 2 => 1
+    // │ 2  3 │ Triangle 2: 1 => 2 => 3
+    // └──────┘
+    triangles.emplace_back(0, 2, 1);
+    triangles.emplace_back(1, 2, 3);
+    return triangles;
+}
+
+static gl::IndexVector<gl::Triangles> quadTriangleIndicesInverted() {
+    gl::IndexVector<gl::Triangles> triangles;
+    // ┌──────┐
+    // │ 1  0 │ Counter-clockwise winding order (inverted Y-axis).
+    // │      │ Triangle 1: 0 => 1 => 2
+    // │ 3  2 │ Triangle 2: 1 => 3 => 2
+    // └──────┘
+    triangles.emplace_back(0, 1, 2);
+    triangles.emplace_back(1, 3, 2);
+    return triangles;
 }
 
 static gl::IndexVector<gl::LineStrip> tileLineStripIndices() {
@@ -52,6 +69,7 @@ RenderStaticData::RenderStaticData(gl::Context& context, float pixelRatio, const
       rasterVertexBuffer(context.createVertexBuffer(rasterVertices())),
       extrusionTextureVertexBuffer(context.createVertexBuffer(extrusionTextureVertices())),
       quadTriangleIndexBuffer(context.createIndexBuffer(quadTriangleIndices())),
+      quadTriangleIndexBufferInverted(context.createIndexBuffer(quadTriangleIndicesInverted())),
       tileBorderIndexBuffer(context.createIndexBuffer(tileLineStripIndices())),
       programs(context, ProgramParameters { pixelRatio, false, programCacheDir })
 #ifndef NDEBUG
