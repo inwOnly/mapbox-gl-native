@@ -130,6 +130,7 @@ public:
         context.setDepthMode(depthMode);
         context.setStencilMode(stencilMode);
         context.setColorMode(colorMode);
+        context.setCullFace(CullFace::Enable, CullFaceMode::Back);
 
         context.program = program;
 
