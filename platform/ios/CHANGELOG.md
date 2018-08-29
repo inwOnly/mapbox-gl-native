@@ -11,6 +11,7 @@ Mapbox welcomes participation and contributions from everyone. Please read [CONT
 * Added `MGLShapeOfflineRegion` for defining arbitrarily shaped offline regions [#11447](https://github.com/mapbox/mapbox-gl-native/pull/11447)
 * Added a one-time warning about possible attribute loss when initializing an `MGLShapeSource` with an `MGLShapeCollection` [#12625](https://github.com/mapbox/mapbox-gl-native/pull/12625)
 * Added an `-[MGLMapViewDelegate mapView:shapeAnnotationIsEnabled:]` method to specify whether an annotation is selectable. ([#12352](https://github.com/mapbox/mapbox-gl-native/pull/12352))
+* Fixed bug where completion block passed to `-[MGLMapSnapshotter startWithQueue:completionHandler:]` was not being called in all code paths. ([#12355](https://github.com/mapbox/mapbox-gl-native/pull/12355))
 
 ### Offline
 * Improved SQLite error handling for offline databases that return specific errors. [#12224](https://github.com/mapbox/mapbox-gl-native/pull/12224)

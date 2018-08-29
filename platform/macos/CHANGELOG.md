@@ -7,6 +7,8 @@
 * Fixed inconsistencies in exception naming. ([#12583](https://github.com/mapbox/mapbox-gl-native/issues/12583))
 * Added `MGLShapeOfflineRegion` for defining arbitrarily shaped offline regions [#11447](https://github.com/mapbox/mapbox-gl-native/pull/11447)
 * Added an `-[MGLMapViewDelegate mapView:shapeAnnotationIsEnabled:]` method to specify whether an annotation is selectable. ([#12352](https://github.com/mapbox/mapbox-gl-native/pull/12352))
+* Fixed bug where completion block passed to `-[MGLMapSnapshotter startWithQueue:completionHandler:]` was not being called in all code paths. ([#12355](https://github.com/mapbox/mapbox-gl-native/pull/12355))
+
 
 # 0.10.0 - August 15, 2018
 
@@ -42,8 +44,6 @@
 * Fixed an issue where `-[MGLMapShapshot pointForCoordinate:]` returned incorrect points. ([#12221](https://github.com/mapbox/mapbox-gl-native/pull/12221))
 * Improved caching performance. ([#12072](https://github.com/mapbox/mapbox-gl-native/pull/12072))
 * Remove unnecessary memory use when collision debug mode is disabled. ([#12294](https://github.com/mapbox/mapbox-gl-native/issues/12294))
-* Changed `-[MGLMapSnapshotter cancel]` to call the completion block (originally passed to `-[MGLMapSnapshotter startWithQueue:completionHandler:]`) with an `NSError` (error code `MGLErrorCodeSnapshotUserCancelled`) if the snapshot has not finished. ([#12355](https://github.com/mapbox/mapbox-gl-native/pull/12355))
-
 
 ## 0.8.0 - June 20, 2018
 
