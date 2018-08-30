@@ -1,0 +1,64 @@
+<%
+  const type = locals.type;
+  const properties = locals.properties;
+-%>
+// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+
+package com.mapbox.mapboxsdk.testapp.symbol;
+
+import android.support.test.runner.AndroidJUnit4;
+
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.symbol.Symbol;
+import com.mapbox.mapboxsdk.symbol.SymbolManager;
+import timber.log.Timber;
+
+import com.mapbox.mapboxsdk.testapp.activity.BaseActivityTest;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import static com.mapbox.mapboxsdk.testapp.action.MapboxMapAction.invoke;
+import static org.junit.Assert.*;
+import static com.mapbox.mapboxsdk.style.layers.Property.*;
+
+import com.mapbox.mapboxsdk.testapp.activity.espresso.EspressoTestActivity;
+
+/**
+ * Basic smoke tests for <%- camelize(type) %>
+ */
+@RunWith(AndroidJUnit4.class)
+public class <%- camelize(type) %>Test extends BaseActivityTest {
+
+  private Symbol symbol;
+
+  @Override
+  protected Class getActivityClass() {
+    return EspressoTestActivity.class;
+  }
+
+  private void setupSymbol() {
+    Timber.i("Retrieving layer");
+    invoke(mapboxMap, (uiController, mapboxMap) -> {
+      SymbolManager symbolManager = new SymbolManager(mapboxMap);
+      symbol = symbolManager.createSymbol(new LatLng());
+    });
+  }
+<% for (const property of properties) { -%>
+<% if (supportsPropertyFunction(property)) { -%>
+
+  @Test
+  public void test<%- camelize(property.name) %>() {
+    validateTestSetup();
+    setupSymbol();
+    Timber.i("<%- property.name %>");
+    invoke(mapboxMap, (uiController, mapboxMap) -> {
+      assertNotNull(symbol);
+
+      symbol.set<%- camelize(property.name) %>(<%- defaultValueJava(property) %>);
+      assertEquals((<%- propertyType(property) %>) symbol.get<%- camelize(property.name) %>(), (<%- propertyType(property) %>) <%- defaultValueJava(property) %>);
+    });
+  }
+<% } -%>
+<% } -%>
+}

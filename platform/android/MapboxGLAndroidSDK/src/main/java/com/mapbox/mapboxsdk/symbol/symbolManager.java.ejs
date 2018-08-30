@@ -1,0 +1,153 @@
+<%
+  const type = locals.type;
+  const properties = locals.properties;
+  const doc = locals.doc;
+-%>
+// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+
+package com.mapbox.mapboxsdk.symbol;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.UiThread;
+import android.support.annotation.VisibleForTesting;
+import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.*;
+
+/**
+ * The symbol manager allows to add symbols to a map.
+ */
+public class SymbolManager {
+
+  public static final String ID_GEOJSON_SOURCE = "mapbox-android-symbol-source";
+  public static final String ID_GEOJSON_LAYER = "mapbox-android-symbol-layer";
+
+  // map integration components
+  private GeoJsonSource geoJsonSource;
+  private SymbolLayer symbolLayer;
+
+  // internal data set
+  private List<Symbol> symbolList = new ArrayList<>();
+  private long currentMarkerId;
+
+  /**
+   * Create a symbol manager, used to manage symbols.
+   *
+   * @param mapboxMap the map object to add symbols to
+   */
+  @UiThread
+  public SymbolManager(@NonNull MapboxMap mapboxMap) {
+    this(mapboxMap, new GeoJsonSource(ID_GEOJSON_SOURCE), new SymbolLayer(ID_GEOJSON_LAYER, ID_GEOJSON_SOURCE)
+      .withProperties(
+        getLayerDefinition()
+      )
+    );
+  }
+
+  /**
+   * Create a symbol manager, used to manage symbols.
+   *
+   * @param mapboxMap     the map object to add symbols to
+   * @param geoJsonSource the geojson source to add symbols to
+   * @param symbolLayer   the sybol layer to visualise symbols with
+   */
+  @VisibleForTesting
+  public SymbolManager(MapboxMap mapboxMap, @NonNull GeoJsonSource geoJsonSource, SymbolLayer symbolLayer) {
+    this.geoJsonSource = geoJsonSource;
+    this.symbolLayer = symbolLayer;
+    mapboxMap.addSource(geoJsonSource);
+    mapboxMap.addLayer(symbolLayer);
+  }
+
+  /**
+   * Create a symbol on the map from a LatLng coordinate.
+   *
+   * @param latLng place to layout the symbol on the map
+   * @return the newly created symbol
+   */
+  @UiThread
+  public Symbol createSymbol(@NonNull LatLng latLng) {
+    Symbol symbol = new Symbol(this, currentMarkerId);
+    symbol.setLatLng(latLng);
+    currentMarkerId++;
+    symbolList.add(symbol);
+    return symbol;
+  }
+
+  /**
+   * Delete a symbol from the map.
+   *
+   * @param symbol to be deleted
+   */
+  @UiThread
+  public void deleteSymbol(@NonNull Symbol symbol) {
+    symbolList.remove(symbol);
+    updateSource();
+  }
+
+  /**
+   * Get a list of current symbols.
+   *
+   * @return list of symbols
+   */
+  @UiThread
+  public List<Symbol> getSymbols() {
+    return symbolList;
+  }
+
+  /**
+   * Trigger an update to the underlying source
+   */
+  public void updateSource() {
+    // todo move feature creation to a background thread?
+    List<Feature> features = new ArrayList<>();
+    for (Symbol symbol : symbolList) {
+      features.add(Feature.fromGeometry(symbol.getGeometry(), symbol.getFeature()));
+    }
+    geoJsonSource.setGeoJson(FeatureCollection.fromFeatures(features));
+  }
+
+
+  private static PropertyValue<?>[] getLayerDefinition() {
+    return new PropertyValue[]{
+<% for (const property of properties) { -%>
+<% if (supportsPropertyFunction(property)) { -%>
+     <%- camelizeWithLeadingLowercase(property.name) %>(get("<%- property.name %>")),
+<% } -%><% } -%>
+    };
+  }
+
+  // Property accessors
+<% for (const property of properties) { -%>
+<% if (!supportsPropertyFunction(property)) { -%>
+  /**
+   * Get the <%- camelize(property.name) %> property
+   *
+   * @return property wrapper value around <%- propertyType(property) %>
+   */
+  public <%- propertyType(property) %> get<%- camelize(property.name) %>() {
+    return symbolLayer.get<%- camelize(property.name) %>().value;
+  }
+
+  /**
+   * Set the <%- camelize(property.name) %> property
+   *
+   * @param value property wrapper value around <%- propertyType(property) %>
+   */
+  public void set<%- camelize(property.name) %>(<%- propertyType(property) %> value) {
+    symbolLayer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(value));
+  }
+
+<% } -%>
+<% } -%>
+}

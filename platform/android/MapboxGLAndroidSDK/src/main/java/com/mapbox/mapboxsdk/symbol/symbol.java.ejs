@@ -1,0 +1,123 @@
+<%
+  const type = locals.type;
+  const properties = locals.properties;
+  const doc = locals.doc;
+-%>
+// This file is generated. Edit android/platform/scripts/generate-style-code.js, then run `make android-style-code`.
+
+package com.mapbox.mapboxsdk.symbol;
+
+import android.support.annotation.UiThread;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.mapbox.geojson.Geometry;
+import com.mapbox.geojson.Point;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+
+@UiThread
+public class Symbol {
+
+  public static final String ID_KEY = "id-symbol";
+
+  private final SymbolManager symbolManager;
+  private final JsonObject jsonObject = new JsonObject();
+  private Geometry geometry;
+
+  /**
+   * Create a symbol.
+   *
+   * @param symbolManager the symbol manager created and managing the symbol
+   * @param id            the id of the symbol
+   */
+  Symbol(SymbolManager symbolManager, long id) {
+    this.symbolManager = symbolManager;
+    this.jsonObject.addProperty(ID_KEY, id);
+  }
+
+  /**
+   * Get the symbol geometry.
+   *
+   * @return the symbol geometry
+   */
+  Geometry getGeometry() {
+    if (geometry == null) {
+      throw new IllegalStateException();
+    }
+    return geometry;
+  }
+
+  /**
+   * Get the symbol feature properties.
+   *
+   * @return the symbol feature properties
+   */
+  JsonObject getFeature() {
+    return jsonObject;
+  }
+
+  /**
+   * Set the LatLng of the symbol, which represents the location of the symbol on the map
+   *
+   * @param latLng the location of the symbol in a longitude and latitude pair
+   */
+  public void setLatLng(LatLng latLng) {
+    geometry = Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude());
+    symbolManager.updateSource();
+  }
+
+  // Property accessors
+<% for (const property of properties) { -%>
+<% if (supportsPropertyFunction(property)) { -%>
+<% if (propertyType(property).endsWith("[]")) { -%>
+  /**
+   * Get the <%- camelize(property.name) %> property
+   *
+   * @return property wrapper value around <%- propertyType(property) %>
+   */
+  public <%- propertyType(property) %> get<%- camelize(property.name) %>() {
+    JsonArray jsonArray = jsonObject.getAsJsonArray("<%-property.name %>");
+    <%- propertyType(property) %> value = new <%- propertyType(property).substring(0, propertyType(property).length-1) %>jsonArray.size()];
+    for (int i = 0; i < jsonArray.size(); i++) {
+      value[i] = jsonArray.get(i).getAs<%- propertyType(property).substring(0, propertyType(property).length-2) %>();
+    }
+    return value;
+  }
+
+  /**
+   * Set the <%- camelize(property.name) %> property
+   *
+   * @return property wrapper value around <%- propertyType(property) %>
+   */
+  public void set<%- camelize(property.name) %>(<%- propertyType(property) %> value) {
+    JsonArray jsonArray = new JsonArray();
+    for (<%- propertyType(property).substring(0, propertyType(property).length-2) %> element : value) {
+      jsonArray.add(element);
+    }
+    jsonObject.add("<%-property.name %>", jsonArray);
+    symbolManager.updateSource();
+  }
+
+<% } else { -%>
+  /**
+   * Get the <%- camelize(property.name) %> property
+   *
+   * @return property wrapper value around <%- propertyType(property) %>
+   */
+  public <%- propertyType(property) %> get<%- camelize(property.name) %>() {
+    return jsonObject.get("<%- property.name %>").getAs<%- propertyType(property) %>();
+  }
+
+  /**
+   * Set the <%- camelize(property.name) %> property
+   *
+   * @return property wrapper value around <%- propertyType(property) %>
+   */
+  public void set<%- camelize(property.name) %>(<%- propertyType(property) %> value) {
+    jsonObject.addProperty("<%- property.name %>", value);
+    symbolManager.updateSource();
+  }
+
+<% } -%>
+<% } -%>
+<% } -%>
+}
