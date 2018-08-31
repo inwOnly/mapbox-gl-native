@@ -53,6 +53,10 @@ public:
     PropertyValue<bool> getSymbolAvoidEdges() const;
     void setSymbolAvoidEdges(PropertyValue<bool>);
 
+    static PropertyValue<bool> getDefaultSymbolSortRelativeToViewport();
+    PropertyValue<bool> getSymbolSortRelativeToViewport() const;
+    void setSymbolSortRelativeToViewport(PropertyValue<bool>);
+
     static PropertyValue<bool> getDefaultIconAllowOverlap();
     PropertyValue<bool> getIconAllowOverlap() const;
     void setIconAllowOverlap(PropertyValue<bool>);

@@ -27,6 +27,11 @@ struct SymbolAvoidEdges : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
+struct SymbolSortRelativeToViewport : LayoutProperty<bool> {
+    static constexpr const char * key = "symbol-sort-relative-to-viewport";
+    static bool defaultValue() { return true; }
+};
+
 struct IconAllowOverlap : LayoutProperty<bool> {
     static constexpr const char * key = "icon-allow-overlap";
     static bool defaultValue() { return false; }
@@ -252,6 +257,7 @@ class SymbolLayoutProperties : public Properties<
     SymbolPlacement,
     SymbolSpacing,
     SymbolAvoidEdges,
+    SymbolSortRelativeToViewport,
     IconAllowOverlap,
     IconIgnorePlacement,
     IconOptional,

@@ -149,6 +149,22 @@ void SymbolLayer::setSymbolAvoidEdges(PropertyValue<bool> value) {
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
+PropertyValue<bool> SymbolLayer::getDefaultSymbolSortRelativeToViewport() {
+    return SymbolSortRelativeToViewport::defaultValue();
+}
+
+PropertyValue<bool> SymbolLayer::getSymbolSortRelativeToViewport() const {
+    return impl().layout.get<SymbolSortRelativeToViewport>();
+}
+
+void SymbolLayer::setSymbolSortRelativeToViewport(PropertyValue<bool> value) {
+    if (value == getSymbolSortRelativeToViewport())
+        return;
+    auto impl_ = mutableImpl();
+    impl_->layout.get<SymbolSortRelativeToViewport>() = value;
+    baseImpl = std::move(impl_);
+    observer->onLayerChanged(*this);
+}
 PropertyValue<bool> SymbolLayer::getDefaultIconAllowOverlap() {
     return IconAllowOverlap::defaultValue();
 }
@@ -1440,6 +1456,7 @@ optional<Error> SymbolLayer::setLayoutProperty(const std::string& name, const Co
         SymbolPlacement,
         SymbolSpacing,
         SymbolAvoidEdges,
+        SymbolSortRelativeToViewport,
         IconAllowOverlap,
         IconIgnorePlacement,
         IconOptional,
@@ -1493,6 +1510,12 @@ optional<Error> SymbolLayer::setLayoutProperty(const std::string& name, const Co
     case util::hashFNV1a("symbol-avoid-edges"):
         if (name == "symbol-avoid-edges") {
             property = Property::SymbolAvoidEdges;
+        }
+        break;
+    
+    case util::hashFNV1a("symbol-sort-relative-to-viewport"):
+        if (name == "symbol-sort-relative-to-viewport") {
+            property = Property::SymbolSortRelativeToViewport;
         }
         break;
     
@@ -1747,7 +1770,7 @@ optional<Error> SymbolLayer::setLayoutProperty(const std::string& name, const Co
         
     }
     
-    if (property == Property::SymbolAvoidEdges || property == Property::IconAllowOverlap || property == Property::IconIgnorePlacement || property == Property::IconOptional || property == Property::IconKeepUpright || property == Property::TextKeepUpright || property == Property::TextAllowOverlap || property == Property::TextIgnorePlacement || property == Property::TextOptional) {
+    if (property == Property::SymbolAvoidEdges || property == Property::SymbolSortRelativeToViewport || property == Property::IconAllowOverlap || property == Property::IconIgnorePlacement || property == Property::IconOptional || property == Property::IconKeepUpright || property == Property::TextKeepUpright || property == Property::TextAllowOverlap || property == Property::TextIgnorePlacement || property == Property::TextOptional) {
         Error error;
         optional<PropertyValue<bool>> typedValue = convert<PropertyValue<bool>>(value, error, false, false);
         if (!typedValue) {
@@ -1756,6 +1779,11 @@ optional<Error> SymbolLayer::setLayoutProperty(const std::string& name, const Co
         
         if (property == Property::SymbolAvoidEdges) {
             setSymbolAvoidEdges(*typedValue);
+            return nullopt;
+        }
+        
+        if (property == Property::SymbolSortRelativeToViewport) {
+            setSymbolSortRelativeToViewport(*typedValue);
             return nullopt;
         }
         
