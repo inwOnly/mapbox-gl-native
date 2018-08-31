@@ -135,6 +135,10 @@ typedef void (^MGLOfflinePackAdditionCompletionHandler)(MGLOfflinePack * _Nullab
 typedef void (^MGLOfflinePackRemovalCompletionHandler)(NSError * _Nullable error);
 
 /**
+ */
+typedef void (^MGLOfflineMergeCompletionHandler)(NSArray<MGLOfflinePack *> *packs, NSError * _Nullable error);
+
+/**
  The type of resource that is requested.
  */
 typedef NS_ENUM(NSUInteger, MGLResourceKind) {
@@ -173,6 +177,10 @@ MGL_EXPORT
  Returns the shared offline storage object.
  */
 @property (class, nonatomic, readonly) MGLOfflineStorage *sharedOfflineStorage;
+
+#pragma mark - Merging Offline Regions
+
+- (void)mergeOfflineRegions:(NSString *)databaseURL withCompletionHandler:(nullable MGLOfflineMergeCompletionHandler)completion;
 
 #pragma mark - Accessing the Delegate
 
