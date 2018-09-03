@@ -24,6 +24,7 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ZoomButtonsController;
+
 import com.mapbox.android.gestures.AndroidGesturesManager;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.R;
@@ -42,11 +43,10 @@ import com.mapbox.mapboxsdk.net.ConnectivityReceiver;
 import com.mapbox.mapboxsdk.offline.OfflineGeometryRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineRegionDefinition;
 import com.mapbox.mapboxsdk.offline.OfflineTilePyramidRegionDefinition;
+import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
 import com.mapbox.mapboxsdk.storage.FileSource;
 import com.mapbox.mapboxsdk.utils.BitmapUtils;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -54,6 +54,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
 
 import static com.mapbox.mapboxsdk.maps.widgets.CompassView.TIME_MAP_NORTH_ANIMATION;
 import static com.mapbox.mapboxsdk.maps.widgets.CompassView.TIME_WAIT_IDLE;
@@ -175,9 +178,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     Transform transform = new Transform(nativeMapView, annotationManager.getMarkerViewManager(),
       cameraChangeDispatcher);
 
+    // MapboxMap
     mapboxMap = new MapboxMap(nativeMapView, transform, uiSettings, proj, registerTouchListener,
       annotationManager, cameraChangeDispatcher);
-
     mapCallback.attachMapboxMap(mapboxMap);
 
     // user input
@@ -191,8 +194,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
       mapGestureDetector, cameraChangeDispatcher, getWidth(), getHeight());
     mapZoomButtonController.bind(uiSettings, zoomListener);
 
+    // compass
     compassView.injectCompassAnimationListener(createCompassAnimationListener(cameraChangeDispatcher));
     compassView.setOnClickListener(createCompassClickListener(cameraChangeDispatcher));
+
+    // LocationLayerPlugin
+    mapboxMap.injectLocationLayerPlugin(new LocationLayerPlugin(context, mapboxMap));
+
     // inject widgets with MapboxMap
     attrView.setOnClickListener(new AttributionClickListener(context, mapboxMap));
 
@@ -1211,11 +1219,16 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
 
     @Override
     public void onMapChanged(@MapChange int change) {
-      if (change == DID_FINISH_LOADING_STYLE && initialLoad) {
-        initialLoad = false;
-        mapboxMap.onPreMapReady();
-        onMapReady();
-        mapboxMap.onPostMapReady();
+      if (change == WILL_START_LOADING_MAP) {
+        mapboxMap.onStartLoadingMap();
+      } else if (change == DID_FINISH_LOADING_STYLE) {
+        if (initialLoad) {
+          initialLoad = false;
+          mapboxMap.onPreMapReady();
+          onMapReady();
+          mapboxMap.onPostMapReady();
+        }
+        mapboxMap.onFinishLoadingStyle();
       } else if (change == DID_FINISH_RENDERING_FRAME || change == DID_FINISH_RENDERING_FRAME_FULLY_RENDERED) {
         mapboxMap.onUpdateFullyRendered();
       } else if (change == REGION_IS_CHANGING || change == REGION_DID_CHANGE || change == DID_FINISH_LOADING_MAP) {
