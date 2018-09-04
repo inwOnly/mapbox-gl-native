@@ -42,14 +42,9 @@ public class LocationLayerMapChangeActivity extends AppCompatActivity implements
 
     mapView.setStyleUrl(Utils.getNextStyle());
     mapView.onCreate(savedInstanceState);
-    mapView.getMapAsync(this);
-  }
 
-  @Override
-  public void onMapReady(MapboxMap mapboxMap) {
-    this.mapboxMap = mapboxMap;
     if (PermissionsManager.areLocationPermissionsGranted(this)) {
-      activatePlugin();
+      mapView.getMapAsync(this);
     } else {
       PermissionsManager permissionsManager = new PermissionsManager(new PermissionsListener() {
         @Override
@@ -61,7 +56,7 @@ public class LocationLayerMapChangeActivity extends AppCompatActivity implements
         @Override
         public void onPermissionResult(boolean granted) {
           if (granted) {
-            activatePlugin();
+            mapView.getMapAsync(LocationLayerMapChangeActivity.this);
           } else {
             finish();
           }
@@ -71,8 +66,14 @@ public class LocationLayerMapChangeActivity extends AppCompatActivity implements
     }
   }
 
+  @Override
+  public void onMapReady(MapboxMap mapboxMap) {
+    this.mapboxMap = mapboxMap;
+    activateLocationLayer();
+  }
+
   @SuppressLint("MissingPermission")
-  private void activatePlugin() {
+  private void activateLocationLayer() {
     LocationLayerPlugin locationPlugin = mapboxMap.getLocationLayerPlugin();
     locationPlugin.activateLocationLayerPlugin(this);
     locationPlugin.setRenderMode(RenderMode.COMPASS);
